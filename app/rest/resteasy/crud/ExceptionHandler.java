@@ -1,3 +1,21 @@
+/*
+    This file is part of resteasy-crud-play-module.
+    
+    Copyright Lunatech Research 2010
+
+    resteasy-crud-play-module is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    resteasy-crud-play-module is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU General Lesser Public License
+    along with resteasy-crud-play-module.  If not, see <http://www.gnu.org/licenses/>.
+*/
 package rest.resteasy.crud;
 
 import java.net.HttpURLConnection;
@@ -20,6 +38,11 @@ import org.jboss.resteasy.spi.Failure;
 import play.Logger;
 import play.modules.resteasy.crud.InvalidResponse;
 
+/**
+ * Maps RESTEasy failures to responses, finds Hibernate Validation exceptions
+ * and maps them to InvalidResponse and tries to unwrap exceptions generally.
+ * @author Stéphane Épardaud <stef@epardaud.fr>
+ */
 @Provider
 public class ExceptionHandler implements ExceptionMapper<Throwable> {
 
