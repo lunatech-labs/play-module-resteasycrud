@@ -20,6 +20,7 @@
 package play.modules.resteasy.crud;
 
 import play.Logger;
+import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
@@ -31,6 +32,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 public class CRUDPlugin extends PlayPlugin {
 
     public void enhance(ApplicationClass applicationClass) throws Exception {
+    	Thread.currentThread().setContextClassLoader(Play.classloader);
     	new CRUDEnhancer().enhanceThisClass(applicationClass);
     }
 
