@@ -1,0 +1,5 @@
+# Default resteasy-crud messages
+# You can specialize this file for each language.
+# For exemple, for french create a messages.fr file
+
+#resteasy-crud.name=resteasy-crud

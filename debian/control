@@ -1,0 +1,11 @@
+Source: play-1.1-resteasy-crud-module-1.0
+Section: unknown
+Priority: extra
+Maintainer: Stephane Epardaud <stephane@epardaud.fr>
+Build-Depends: debhelper (>= 7), play-1.1
+Standards-Version: 3.8.3
+
+Package: play-1.1-resteasy-crud-module-1.0
+Architecture: all
+Depends: ${misc:Depends}
+Description: Your play module description

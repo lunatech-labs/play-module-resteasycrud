@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+#-*- makefile -*-
+# Made with the aid of dh_make, by Craig Small
+# Sample debian/rules that uses debhelper. GNU copyright 1997 by Joey Hess.
+# Some lines taken from debmake, by Christoph Lameter.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+VERSION=1.0
+MODULE_NAME=resteasy-crud
+PLAY_VERSION=1.1
+APP=play-1.1-resteasy-crud-module-1.0
+MODULE=$(MODULE_NAME)-$(VERSION)
+
+DEB_PATH=debian/$(APP)
+INSTALL_PATH=/usr/share/play-modules/$(PLAY_VERSION)/$(MODULE)
+
+%:
+	dh  $@
+
+override_dh_auto_build: 
+	/bin/echo -e '\n\n' | play-$(PLAY_VERSION) build-module
+
+override_dh_auto_install:
+	install -d $(DEB_PATH)$(INSTALL_PATH)
+	for d in dist lib src app conf; \
+	 do if test -d $$d; \
+	     then rsync -r --exclude .svn --exclude .CVS $$d $(DEB_PATH)$(INSTALL_PATH); \
+	    fi; \
+	done

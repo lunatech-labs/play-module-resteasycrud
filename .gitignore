@@ -1,0 +1,7 @@
+.classpath
+.project
+commands.pyc
+bin
+dist
+debian/files
+debian/play-1.1-resteasy-crud-module-1.*
