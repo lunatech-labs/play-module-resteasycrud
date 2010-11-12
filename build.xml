@@ -2,6 +2,8 @@
 
 <project name="resteasy-crud" default="build" basedir=".">
 
+	<property name="version" value="1.0"/>
+	
     <path id="project.classpath">
         <pathelement path="${play.path}/framework/classes"/>
         <fileset dir="${play.path}/framework/lib">
@@ -32,6 +34,19 @@
                 </section>
             </manifest>
         </jar>
+    	<mkdir dir="tmp/dist/play-1.1-${ant.project.name}-${version}-module"/>
+    	<mkdir dir="mydist"/>
+    	<copy todir="tmp/dist/play-1.1-${ant.project.name}-${version}-module">
+    		<fileset dir=".">
+    			<include name="src/**"/>
+    			<include name="app/**"/>
+       			<include name="conf/**"/>
+    			<include name="lib/**"/>
+    		</fileset>
+    	</copy>
+    	<zip destfile="mydist/play-1.1-${ant.project.name}-${version}-module.zip" basedir="tmp/dist">
+    		<include name="play-1.1-${ant.project.name}-${version}-module/**"/>
+    	</zip>
         <delete dir="tmp" />
     </target>
 
