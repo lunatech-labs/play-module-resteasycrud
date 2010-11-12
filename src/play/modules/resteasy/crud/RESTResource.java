@@ -301,6 +301,7 @@ public abstract class RESTResource {
 	 */
 	public <T extends Model> Response list(Class<T> model, DataTableQuery q){
 		logQuery(q);
+		checkPermission(model, "select");
 		PagedQuery<T> carriers = findPaged(model);
 		return makeQueryResponse(q, carriers, model,
 				getSortableColumns(model), q.uriInfo);
@@ -347,6 +348,7 @@ public abstract class RESTResource {
 	 * @return a response with no content
 	 */
 	public <T extends Model> Response add(Class<T> model, final T elem, UriInfo uriInfo) {
+		checkPermission(elem, "insert");
 		// check non-editable field
 		walkProperties(model, new PropertyWalker(){
 			@Override
@@ -416,6 +418,7 @@ public abstract class RESTResource {
 	 */
 	public <T extends Model> Response autoComplete(Class<T> model, String field, String q) {
 		checkAutoCompleteQuery(q);
+		checkPermission(model, "select");
 		return autoComplete(AutoComplete.getAutoComplete(model, field, q));
 	}
 	
@@ -426,6 +429,7 @@ public abstract class RESTResource {
 	 * @return a response with the CRUD fields descriptor
 	 */
 	public <T extends Model> Response descriptor(Class<T> model) {
+		checkPermission(model, "select");
 		return Response.ok(new Descriptor<T>(model)).build();
 	}
 
