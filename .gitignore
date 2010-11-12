@@ -5,3 +5,4 @@ bin
 dist
 debian/files
 debian/play-1.1-resteasy-crud-module-1.*
+lib/play-resteasy-crud.jar
