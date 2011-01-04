@@ -61,7 +61,9 @@ public abstract class RESTResource {
 	 * @param name the name of the permission
 	 * @return true if the current user has this permission, false otherwise
 	 */
-	protected abstract boolean hasPermission(Object target, String name);
+	protected boolean hasPermission(Object target, String name){
+		return CRUDSecure.hasPermission(target, name);
+	}
 
 	/**
 	 * Throws a FORBIDDEN exception if the user doesn't have the given permission

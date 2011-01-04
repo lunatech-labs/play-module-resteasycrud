@@ -63,6 +63,8 @@ import org.jboss.resteasy.annotations.Form;
 import org.jboss.resteasy.annotations.providers.jaxb.json.Mapped;
 import org.jboss.resteasy.annotations.providers.jaxb.json.XmlNsMap;
 import org.jboss.resteasy.links.AddLinks;
+import org.jboss.resteasy.links.ELProvider;
+import org.jboss.resteasy.links.LinkELProvider;
 import org.jboss.resteasy.links.LinkResource;
 
 import play.Logger;
@@ -228,6 +230,9 @@ public class CRUDEnhancer extends Enhancer {
 		AnnotationsAttribute annotations = getAnnotations(ctClass);
 		if(!hasAnnotation(ctClass, Path.class)){
 			createAnnotation(annotations, Path.class, map(cp, "/"));
+		}
+		if(!hasAnnotation(ctClass, LinkELProvider.class)){
+			createAnnotation(annotations, LinkELProvider.class, map(cp, PlayELProvider.class));
 		}
 		String[] mediaTypes = new String[]{MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON};
 		if(!hasAnnotation(ctClass, Produces.class)){
