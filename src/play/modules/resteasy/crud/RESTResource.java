@@ -662,8 +662,11 @@ public abstract class RESTResource {
 
 	/**
 	 * Override this to make your own DataTable with the appropriate {@link @XmlSeeAlso} annotation.
+	 * If you do not, one will be provided for you with only T as JAXB context.
 	 */
-	protected abstract <T> DataTable<T> makeDataTable(String echo, long count, List<T> results, Class<T> type, Object oob, UriInfo uriInfo);
+	protected <T> DataTable<T> makeDataTable(String echo, long count, List<T> results, Class<T> type, Object oob, UriInfo uriInfo){
+		return new DataTable<T>(echo, count, results, type, oob, uriInfo);
+	}
 
 	/**
 	 * Checks if the given sort query is valid according to the valid columns

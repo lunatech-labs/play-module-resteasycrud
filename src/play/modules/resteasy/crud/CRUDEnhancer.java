@@ -27,12 +27,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javassist.CannotCompileException;
+import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.CtConstructor;
 import javassist.CtMethod;
+import javassist.CtNewConstructor;
 import javassist.NotFoundException;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.ParameterAnnotationsAttribute;
+import javassist.bytecode.annotation.AnnotationMemberValue;
 import javassist.bytecode.annotation.ArrayMemberValue;
 import javassist.bytecode.annotation.ClassMemberValue;
 import javassist.bytecode.annotation.MemberValue;
@@ -51,12 +55,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlType;
 
 import org.jboss.resteasy.annotations.Form;
+import org.jboss.resteasy.annotations.providers.jaxb.json.Mapped;
+import org.jboss.resteasy.annotations.providers.jaxb.json.XmlNsMap;
 import org.jboss.resteasy.links.AddLinks;
 import org.jboss.resteasy.links.LinkResource;
 
 import play.Logger;
+import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.enhancers.Enhancer;
 import play.db.Model;
@@ -315,10 +325,77 @@ public class CRUDEnhancer extends Enhancer {
 			ctClass.addMethod(descriptor);
 		}
 
+		Signature makeDataTableSignature = new Signature(DataTable.class, "makeDataTable");
+		makeDataTableSignature.param(String.class, "echo");
+		makeDataTableSignature.param(Long.TYPE, "count");
+		makeDataTableSignature.param(List.class, "results");
+		makeDataTableSignature.param(Class.class, "type");
+		makeDataTableSignature.param(Object.class, "oob");
+		makeDataTableSignature.param(UriInfo.class, "uriInfo");
+		if(!hasMethod(ctClass, makeDataTableSignature.name, makeDataTableSignature.signature())){
+			makeDataTable(ctClass, makeDataTableSignature, restCRUD.model());
+		}
+		
 		// Done.
 		applicationClass.enhancedByteCode = ctClass.toBytecode();
 		ctClass.defrost();
 	}
+
+	private void makeDataTable(CtClass ctClass, Signature makeDataTableSignature, Class<? extends Model> modelClass) 
+	throws Exception {
+		// we need the class itself
+		CtClass dataTableClass = ctClass.makeNestedClass("__DataTable", true);
+		ClassPool cp = ctClass.getClassPool();
+
+		// its superclass
+		dataTableClass.setSuperclass(cp.get(DataTable.class.getName()));
+		
+		// its constructor
+		CtClass[] parameters = new CtClass[makeDataTableSignature.parameters.size()];
+		for(int i=0;i<parameters.length ;i++){
+			parameters[i] = cp.get(makeDataTableSignature.parameters.get(i).type.getName());
+		}
+		CtConstructor dataTableConstructor = CtNewConstructor.make(parameters, null, CtNewConstructor.PASS_PARAMS, null, null, dataTableClass);
+
+		// it wants some annotations
+		ConstPool constPool = dataTableClass.getClassFile().getConstPool();
+		AnnotationsAttribute annotations = getAnnotations(dataTableClass);
+		createAnnotation(annotations, XmlType.class, map(constPool, "namespace", dataTableClass.getName()));
+		createAnnotation(annotations, XmlRootElement.class, map(constPool, "name", "dataTable"));
+		createAnnotation(annotations, XmlSeeAlso.class, map(constPool, new Object[]{modelClass}));
+		createAnnotation(annotations, Mapped.class, map(constPool, "namespaceMap", 
+				new Object[]{
+					createAnnotation(XmlNsMap.class, map(constPool, "namespace", "http://www.w3.org/2001/XMLSchema-instance")
+							.add("jsonName", "xsi"), constPool),
+					createAnnotation(XmlNsMap.class, map(constPool, "namespace", "http://www.w3.org/2005/Atom")
+							.add("jsonName", "atom"), constPool)
+		}));
+		
+		// now add the constructor
+		dataTableClass.addConstructor(dataTableConstructor);
+		
+		// and give the whole class to play
+		ApplicationClass dataTableApplicationClass = new ApplicationClass(dataTableClass.getName());
+		dataTableApplicationClass.compiled(dataTableClass.toBytecode());
+		dataTableClass.defrost();
+		Play.classes.add(dataTableApplicationClass);
+
+		// now build the method's body
+		StringBuilder ret = new StringBuilder(makeDataTableSignature.decl());
+		ret.append("{ return new ").append(dataTableClass.getName()).append("(");
+		boolean once = false;
+		for(Param param : makeDataTableSignature.parameters){
+			if(once)
+				ret.append(", ");
+			else
+				once = true;
+			ret.append(param.name);
+		}
+		ret.append("); }");
+		// make the method
+		CtMethod method = CtMethod.make(ret.toString(), ctClass);
+		ctClass.addMethod(method);
+}
 
 	private AnnotationRef<?> linkResourceAnnotation(
 			Class<? extends Model> model, String rel, String permission) {
@@ -339,8 +416,11 @@ public class CRUDEnhancer extends Enhancer {
 	}
 
 	private static String typeSignature(Class<?> type) {
-		if(type.isPrimitive())
+		if(type.isPrimitive()){
+			if(type == Long.TYPE)
+				return "J";
 			throw new IllegalArgumentException("Primitive types not implemented: "+type);
+		}
 		return "L"+type.getName()+";";
 	}
 
@@ -394,6 +474,8 @@ public class CRUDEnhancer extends Enhancer {
 			return new StringMemberValue((String)value, cp);
 		if(value instanceof Class)
 			return new ClassMemberValue(((Class<?>)value).getName(), cp);
+		if(value instanceof javassist.bytecode.annotation.Annotation)
+			return new AnnotationMemberValue((javassist.bytecode.annotation.Annotation)value, cp);
 		if(value.getClass().isArray()){
 			ArrayMemberValue ret = new ArrayMemberValue(cp);
 			Object[] values = (Object[])value;
@@ -453,6 +535,14 @@ public class CRUDEnhancer extends Enhancer {
         newParamAnnotations[paramAnnotations.length] = annotation;
         annotations[i] = newParamAnnotations;
         attribute.setAnnotations(annotations);
+    }
+
+    protected static javassist.bytecode.annotation.Annotation createAnnotation(Class<? extends Annotation> annotationType, Map<String, MemberValue> members, ConstPool cp) {
+        javassist.bytecode.annotation.Annotation annotation = new javassist.bytecode.annotation.Annotation(annotationType.getName(), cp);
+        for (Map.Entry<String, MemberValue> member : members.entrySet()) {
+            annotation.addMemberValue(member.getKey(), member.getValue());
+        }
+        return annotation;
     }
 
 }
