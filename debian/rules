@@ -7,10 +7,10 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-VERSION=1.0
+VERSION=1.1
 MODULE_NAME=resteasy-crud
 PLAY_VERSION=1.1
-APP=play-1.1-resteasy-crud-module-1.0
+APP=play-$(PLAY_VERSION)-resteasy-crud-module-$(VERSION)
 MODULE=$(MODULE_NAME)-$(VERSION)
 
 DEB_PATH=debian/$(APP)
@@ -24,7 +24,7 @@ override_dh_auto_build:
 
 override_dh_auto_install:
 	install -d $(DEB_PATH)$(INSTALL_PATH)
-	for d in dist lib src app conf; \
+	for d in lib src app conf; \
 	 do if test -d $$d; \
 	     then rsync -r --exclude .svn --exclude .CVS $$d $(DEB_PATH)$(INSTALL_PATH); \
 	    fi; \
