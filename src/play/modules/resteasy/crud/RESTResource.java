@@ -20,6 +20,7 @@ package play.modules.resteasy.crud;
 
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import java.util.StringTokenizer;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -181,6 +183,13 @@ public abstract class RESTResource {
 	}
 
 	/**
+	 * Returns a CREATED response with a Location header
+	 */
+	protected Response created(URI location) {
+		return status(HttpURLConnection.HTTP_CREATED, location);
+	}
+
+	/**
 	 * Returns an INTERNAL_ERROR response
 	 */
 	protected Response internalError() {
@@ -251,6 +260,16 @@ public abstract class RESTResource {
 	protected Response status(int code, Object entity){
 		Logger.info("Returning code %s: %s", code, entity);
 		return Response.status(code).entity(entity).build();
+	}
+
+	/**
+	 * Returns a response with the specified status code and Location header
+	 * @param code the status code
+	 * @param location the Location header
+	 */
+	protected Response status(int code, URI location){
+		Logger.info("Returning code %s: %s", code, location);
+		return Response.status(code).location(location).build();
 	}
 
 	/**
@@ -367,7 +386,10 @@ public abstract class RESTResource {
 			}
 		});
 		elem._save();
-		return created();
+		// now get the link to the new element
+		UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
+		URI uri = uriBuilder.path(getClass()).path(getClass(), "get").build(elem._key());
+		return created(uri);
 	}
 
 	/**
