@@ -1,3 +1,9 @@
+play-1.1-resteasy-crud-module-1.1 (1.1.1) maverick; urgency=low
+
+  * Added Location URI to add()
+
+ -- Stephane Epardaud <stephane@eden>  Fri, 08 Apr 2011 16:54:13 +0200
+
 play-1.1-resteasy-crud-module-1.1 (1.1ubuntu1) maverick; urgency=low
 
   * Upgraded to RESTEasy 2.1
