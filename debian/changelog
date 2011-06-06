@@ -1,8 +1,9 @@
 play-1.1-resteasy-crud-module-1.1 (1.1.1) maverick; urgency=low
 
   * Added Location URI to add()
+  * Added support for decimals, more int types and date types
 
- -- Stephane Epardaud <stephane@eden>  Fri, 08 Apr 2011 16:54:13 +0200
+ -- Stephane Epardaud <stephane@epardaud.fr>  Mon, 06 Jun 2011 11:12:31 +0200
 
 play-1.1-resteasy-crud-module-1.1 (1.1ubuntu1) maverick; urgency=low
 
