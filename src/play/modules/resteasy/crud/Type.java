@@ -36,6 +36,10 @@ public enum Type {
 	 */
 	INTEGER,
 	/**
+	 * Decimal type
+	 */
+	DECIMAL, 
+	/**
 	 * Boolean type
 	 */
 	BOOLEAN, 

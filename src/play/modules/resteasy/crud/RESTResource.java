@@ -19,10 +19,14 @@
 package play.modules.resteasy.crud;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -567,8 +571,24 @@ public abstract class RESTResource {
 			if(fieldType == String.class){
 				type = Type.STRING.name();
 			}else if(fieldType == Integer.class
-					|| fieldType == Integer.TYPE){
+					|| fieldType == Integer.TYPE
+					|| fieldType == Long.class
+					|| fieldType == Long.TYPE
+					|| fieldType == Short.class
+					|| fieldType == Short.TYPE
+					|| fieldType == BigInteger.class){
 				type = Type.INTEGER.name();
+			}else if(fieldType == Float.class
+					|| fieldType == Float.TYPE
+					|| fieldType == Double.class
+					|| fieldType == Double.TYPE
+					|| fieldType == BigDecimal.class){
+				type = Type.DECIMAL.name();
+			}else if(fieldType == Date.class
+					|| fieldType == Calendar.class
+					|| fieldType == java.sql.Date.class
+					|| fieldType == java.sql.Timestamp.class){
+				type = Type.DATE.name();
 			}else if(fieldType == Boolean.class){
 				type = Type.BOOLEAN.name();
 			}else
